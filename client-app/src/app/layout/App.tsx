@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Container } from "semantic-ui-react";
 import { v4 as uuid } from "uuid";
 import ActivityDashboard from "../../features/activity/dashboard/ActivityDashboard";
-import { Activity } from "../../modules/activity";
+import { Activity } from "../models/activity";
 import NavBar from "./NavBar";
 
 function App() {
