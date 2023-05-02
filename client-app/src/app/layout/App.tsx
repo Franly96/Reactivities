@@ -1,76 +1,30 @@
-import axios from "axios";
-import React, { useEffect, useState } from "react";
+import { observer } from "mobx-react-lite";
+import React, { useEffect } from "react";
 import { Container } from "semantic-ui-react";
-import { v4 as uuid } from "uuid";
 import ActivityDashboard from "../../features/activity/dashboard/ActivityDashboard";
-import { Activity } from "../models/activity";
+import { useStore } from "../stores/store";
+import LoadingComponent from "./LoadingComponent";
 import NavBar from "./NavBar";
 
 function App() {
-  const [activities, setActivities] = useState<Activity[]>([]);
-  const [selectedActivity, setSelectedActivity] = useState<
-    Activity | undefined
-  >(undefined);
-  const [editMode, setEditMode] = useState(false);
-
+  const { activityStore } = useStore();
+  const { loadingInitial } = activityStore;
   useEffect(() => {
-    axios
-      .get<Activity[]>("http://localhost:5000/api/activities")
-      .then((response) => {
-        setActivities(response.data);
-      });
-  }, []);
-
-  function handleSelectActivity(id: string) {
-    setSelectedActivity(activities.find((activity) => activity.id === id));
-  }
-
-  function handleCancelSelectActivity() {
-    setSelectedActivity(undefined);
-  }
-
-  function handleFormOpen(id?: string) {
-    id ? handleSelectActivity(id) : handleCancelSelectActivity();
-    setEditMode(true);
-  }
-
-  function handleFormClose() {
-    setEditMode(false);
-  }
-
-  function handleCreateOrUpdateActivity(activity: Activity) {
-    activity.id
-      ? setActivities([
-          ...activities.filter((x) => x.id !== activity.id),
-          activity,
-        ])
-      : setActivities([...activities, { ...activity, id: uuid() }]);
-    setEditMode(false);
-    setSelectedActivity(activity);
-  }
-
-  function handleRemoveActivity(id: string){
-    setActivities([...activities.filter(x => x.id !== id)]);
+    activityStore.loadActivities();
+  }, [activityStore]);
+  
+  if (loadingInitial) {
+    return <LoadingComponent />;
   }
 
   return (
     <>
-      <NavBar openForm={handleFormOpen} />
+      <NavBar />
       <Container style={{ marginTop: "7em" }}>
-        <ActivityDashboard
-          activities={activities}
-          selectedActivity={selectedActivity}
-          selectActivity={handleSelectActivity}
-          cancelSelectActivity={handleCancelSelectActivity}
-          formOpen={handleFormOpen}
-          formClose={handleFormClose}
-          editMode={editMode}
-          createOrUpdateActivity={handleCreateOrUpdateActivity}
-          removeActivity={handleRemoveActivity}
-        />
+        <ActivityDashboard/>
       </Container>
     </>
   );
 }
 
-export default App;
+export default observer(App);
