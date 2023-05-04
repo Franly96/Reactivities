@@ -1,36 +1,43 @@
-import React from "react";
+import { observer } from "mobx-react-lite";
+import React, { useEffect } from "react";
+import { Link, useParams } from "react-router-dom";
 import { Button, Card, Image } from "semantic-ui-react";
+import LoadingComponent from "../../../app/layout/LoadingComponent";
 import { useStore } from "../../../app/stores/store";
 
-export default function ActivityDetails() {
+export default observer(function ActivityDetails() {
   const { activityStore } = useStore();
-  if (!activityStore.selectedActivity) return null;
+  const { selectedActivity: activity, loadActivity, loadingInitial } = activityStore;
+
+  const { id } = useParams();
+
+  useEffect(() => {
+    if (id) loadActivity(id);
+  }, [id, loadActivity]);
+
+  if (loadingInitial || !activity) return <LoadingComponent/>;
   return (
     <Card fluid>
-      <Image
-        src={`/assets/categoryImages/${activityStore.selectedActivity.category}.jpg`}
-      />
+      <Image src={`/assets/categoryImages/${activity.category}.jpg`} />
       <Card.Content>
-        <Card.Header>{activityStore.selectedActivity.title}</Card.Header>
+        <Card.Header>{activity.title}</Card.Header>
         <Card.Meta>
-          <span>{activityStore.selectedActivity.date}</span>
+          <span>{activity.date}</span>
         </Card.Meta>
-        <Card.Description>
-          {activityStore.selectedActivity.description}
-        </Card.Description>
+        <Card.Description>{activity.description}</Card.Description>
       </Card.Content>
       <Card.Content extra>
         <Button.Group widths="2">
           <Button
-            onClick={() =>
-              activityStore.openForm(activityStore.selectedActivity?.id)
-            }
+            as={Link}
+            to={`/activities/edit/${activity.id}`}
             basic
             color="blue"
             content="Edit"
           />
           <Button
-            onClick={activityStore.cancelSelectedActivity}
+            as={Link}
+            to="/activities"
             basic
             color="grey"
             content="Cancel"
@@ -39,4 +46,4 @@ export default function ActivityDetails() {
       </Card.Content>
     </Card>
   );
-}
+});
