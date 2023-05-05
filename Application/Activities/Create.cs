@@ -37,11 +37,6 @@ namespace Application.Activities
                 return Result<Unit>.Success(Unit.Value);
                 
             }
-
-            Task<Result<Unit>> IRequestHandler<Command, Result<Unit>>.Handle(Command request, CancellationToken cancellationToken)
-            {
-                throw new NotImplementedException();
-            }
         }
     }
 }
