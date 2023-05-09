@@ -2,20 +2,44 @@ import { observer } from "mobx-react-lite";
 import { Outlet, useLocation } from "react-router-dom";
 import { Container } from "semantic-ui-react";
 
+import { useEffect } from "react";
 import { ToastContainer } from "react-toastify";
 import HomePage from "../../features/home/HomePage";
+import ModalContainer from "../common/modals/ModalContainer";
+import { useStore } from "../stores/store";
+import LoadingComponent from "./LoadingComponent";
 import NavBar from "./NavBar";
 
 function App() {
   const location = useLocation();
-  if (location.pathname === "/") return <HomePage />;
+  const { commonStore, userStore } = useStore();
+
+  useEffect(() => {
+    if (commonStore.token) {
+      userStore.getUser().finally(() => commonStore.setAppLoaded());
+    } else {
+      commonStore.setAppLoaded();
+    }
+  }, [commonStore, userStore]);
+
+  if (!commonStore.appLoaded) {
+    return <LoadingComponent content="Loading app..." />;
+  }
+
   return (
     <>
+      <ModalContainer />
       <ToastContainer position="bottom-right" hideProgressBar theme="colored" />
-      <NavBar />
-      <Container style={{ marginTop: "7em" }}>
-        <Outlet />
-      </Container>
+      {location.pathname === "/" ? (
+        <HomePage />
+      ) : (
+        <>
+          <NavBar />
+          <Container style={{ marginTop: "7em" }}>
+            <Outlet />
+          </Container>
+        </>
+      )}
     </>
   );
 }

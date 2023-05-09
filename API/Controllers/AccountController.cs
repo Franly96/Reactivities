@@ -41,12 +41,14 @@ namespace API.Controllers
         {
             if (await this.userManager.Users.AnyAsync(x => x.UserName == registerDTO.Username))
             {
-                return BadRequest("username is already taken");
+                ModelState.AddModelError("username", "username is already taken");
+                return ValidationProblem();
             }
 
             if (await this.userManager.Users.AnyAsync(x => x.Email == registerDTO.Email))
             {
-                return BadRequest("Email is already taken");
+                ModelState.AddModelError("email", "Email is already taken");
+                return ValidationProblem();
             }
             var user = new AppUser { DisplayName = registerDTO.DisplayName, Email = registerDTO.Email, UserName = registerDTO.Username };
             var result = await this.userManager.CreateAsync(user, registerDTO.Password);
